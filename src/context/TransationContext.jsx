@@ -20,7 +20,23 @@ export const TransationsProvider = ({ children }) => {
     const creatShotAddress = currentAccount.substring(0, 5) + ` ........ ` + String(currentAccount).slice(-4);;
       
     const [formData, setformData] = useState({ addressTo: '', amount: '', message: '' });
-    const [loading, setloading] = useState("h1")
+    const [loading, setloading] = useState(false);
+
+    const handleChange = (e, name) => {
+        setformData((prev) => ({ ...prev, [name]: e.target.value }));
+    }
+
+    const getAllTransation = async () => {
+        try {
+            const transationContract = getEthereumContract();
+            const getTransations = await transationContract.Gettransations();
+
+            console.log(getTransations);
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
 
     const ConnectWallet = async () => {
     
