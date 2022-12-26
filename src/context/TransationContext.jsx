@@ -12,15 +12,14 @@ const getEthereumContract = () => {
 
     return transationContract;
 
-
 };
 
 export const TransationsProvider = ({ children }) => {
     const [currentAccount, setcurrentAccount] = useState('');
     const creatShotAddress = currentAccount.substring(0, 5) + ` ........ ` + String(currentAccount).slice(-4);;
-
     const [formData, setformData] = useState({ addressTo: '', amount: '', message: '' });
     const [loading, setloading] = useState(false);
+    const [transactions, setTransactions] = useState([]);
 
     const handleChange = (e, name) => {
         setformData((prev) => ({ ...prev, [name]: e.target.value }));
@@ -29,9 +28,20 @@ export const TransationsProvider = ({ children }) => {
     const getAllTransation = async () => {
         try {
             const transationContract = getEthereumContract();
-            const getTransations = await transationContract.Gettransations();
-
-            console.log(getTransations);
+            const availableTransactions = await transationContract.Gettransations();//this Gettransations() from Transations.sol (smartcontract)
+            const structuredTransactions = availableTransactions.map((transaction) => ({
+                addressTo: transaction.receiver,
+                addressFrom: transaction.sender,
+                timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+                message: transaction.message,
+               
+                amount: parseInt(transaction.amount._hex) / (10 ** 18)
+              }));
+      
+              console.log(structuredTransactions);
+      
+              setTransactions(structuredTransactions);
+            console.log(availableTransactions);
         } catch (error) {
             console.log(error)
         }
@@ -44,9 +54,10 @@ export const TransationsProvider = ({ children }) => {
             alert("Please install metamask")
         }
         else {
-            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            // const provider = new ethers.providers.Web3Provider(window.ethereum)
 
-            const accounts = await provider.send("eth_requestAccounts", []);
+            // const accounts = await provider.send("eth_requestAccounts", []);
+            const accounts = await ethereum.request({ method: "eth_requestAccounts", });
             setcurrentAccount(accounts[0]);
             console.log(currentAccount);
             getAllTransation();
